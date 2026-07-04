@@ -519,7 +519,11 @@ func (r FilterAnd) String() (s string) {
 		for _, ref := range r {
 			parts = append(parts, ref.String())
 		}
-		s = "(&" + strings.Join(parts, "") + ")"
+		bld := &strings.Builder{}
+		bld.WriteString("(&")
+		bld.WriteString(strings.Join(parts, ""))
+		bld.WriteString(")")
+		s = bld.String()
 	}
 
 	return
@@ -534,7 +538,11 @@ func (r FilterOr) String() (s string) {
 		for _, ref := range r {
 			parts = append(parts, ref.String())
 		}
-		s = "(|" + strings.Join(parts, "") + ")"
+		bld := &strings.Builder{}
+		bld.WriteString("(|")
+		bld.WriteString(strings.Join(parts, ""))
+		bld.WriteString(")")
+		s = bld.String()
 	}
 
 	return
@@ -545,7 +553,11 @@ String returns the string representation of the receiver instance.
 */
 func (r FilterNot) String() (s string) {
 	if !r.IsZero() {
-		s = "(!" + r.Filter.String() + ")"
+		bld := &strings.Builder{}
+		bld.WriteString("(!")
+		bld.WriteString(r.Filter.String())
+		bld.WriteString(")")
+		s = bld.String()
 	}
 
 	return
@@ -556,7 +568,13 @@ String returns the string representation of the receiver instance.
 */
 func (r FilterEqualityMatch) String() (s string) {
 	if !r.IsZero() {
-		s = `(` + r.Desc.String() + `=` + r.Value.String() + `)`
+		bld := &strings.Builder{}
+		bld.WriteString("(")
+		bld.WriteString(r.Desc.String())
+		bld.WriteString("=")
+		bld.WriteString(r.Value.String())
+		bld.WriteString(")")
+		s = bld.String()
 	}
 
 	return
@@ -567,7 +585,13 @@ String returns the string representation of the receiver instance.
 */
 func (r FilterGreaterOrEqual) String() (s string) {
 	if !r.IsZero() {
-		s = `(` + r.Desc.String() + `>=` + r.Value.String() + `)`
+		bld := &strings.Builder{}
+		bld.WriteString("(")
+		bld.WriteString(r.Desc.String())
+		bld.WriteString(">=")
+		bld.WriteString(r.Value.String())
+		bld.WriteString(")")
+		s = bld.String()
 	}
 
 	return
@@ -578,7 +602,13 @@ String returns the string representation of the receiver instance.
 */
 func (r FilterLessOrEqual) String() (s string) {
 	if !r.IsZero() {
-		s = `(` + r.Desc.String() + `<=` + r.Value.String() + `)`
+		bld := &strings.Builder{}
+		bld.WriteString("(")
+		bld.WriteString(r.Desc.String())
+		bld.WriteString("<=")
+		bld.WriteString(r.Value.String())
+		bld.WriteString(")")
+		s = bld.String()
 	}
 
 	return
@@ -589,7 +619,13 @@ String returns the string representation of the receiver instance.
 */
 func (r FilterApproximateMatch) String() (s string) {
 	if !r.IsZero() {
-		s = `(` + r.Desc.String() + `~=` + r.Value.String() + `)`
+		bld := &strings.Builder{}
+		bld.WriteString("(")
+		bld.WriteString(r.Desc.String())
+		bld.WriteString("~=")
+		bld.WriteString(r.Value.String())
+		bld.WriteString(")")
+		s = bld.String()
 	}
 
 	return
@@ -600,7 +636,11 @@ String returns the string representation of the receiver instance.
 */
 func (r FilterPresent) String() (s string) {
 	if !r.IsZero() {
-		s = `(` + r.Desc.String() + `=*` + `)`
+		bld := &strings.Builder{}
+		bld.WriteString("(")
+		bld.WriteString(r.Desc.String())
+		bld.WriteString("=*)")
+		s = bld.String()
 	}
 
 	return
@@ -611,7 +651,13 @@ String returns the string representation of the receiver instance.
 */
 func (r FilterSubstrings) String() (s string) {
 	if !r.IsZero() {
-		s = `(` + string(r.Type) + `=` + r.Substrings.String() + `)`
+		bld := &strings.Builder{}
+		bld.WriteString("(")
+		bld.WriteString(string(r.Type))
+		bld.WriteString("=")
+		bld.WriteString(r.Substrings.String())
+		bld.WriteString(")")
+		s = bld.String()
 	}
 
 	return
@@ -631,29 +677,52 @@ func (r FilterExtensibleMatch) String() (s string) {
 		typ := r.Type.String()
 		mr := r.MatchingRule.String()
 		dna := r.DNAttributes
+		bld := &strings.Builder{}
 
 		if typ != "" && mr == "" {
 			if dna {
-				s = typ + `:dn:=` + value
+				bld.WriteString(typ)
+				bld.WriteString(`:dn:=`)
+				bld.WriteString(value)
 			} else {
-				s = typ + `:=` + value
+				bld.WriteString(typ)
+				bld.WriteString(`:=`)
+				bld.WriteString(value)
 			}
 		} else if typ == "" && mr != "" {
 			if dna {
-				s = `:dn:` + mr + `:=` + value
+				bld.WriteString(`:dn:`)
+				bld.WriteString(mr)
+				bld.WriteString(`:=`)
+				bld.WriteString(value)
 			} else {
-				s = `:` + mr + `:=` + value
+				bld.WriteRune(':')
+				bld.WriteString(mr)
+				bld.WriteString(`:=`)
+				bld.WriteString(value)
 			}
 		} else if typ != "" && mr != "" {
 			if dna {
-				s = typ + `:dn:` + mr + `:=` + value
+				bld.WriteString(typ)
+				bld.WriteString(`:dn:`)
+				bld.WriteString(mr)
+				bld.WriteString(`:=`)
+				bld.WriteString(value)
 			} else {
-				s = typ + `:` + mr + `:=` + value
+				bld.WriteString(typ)
+				bld.WriteRune(':')
+				bld.WriteString(mr)
+				bld.WriteString(`:=`)
+				bld.WriteString(value)
 			}
 		}
 
-		if s != "" {
-			s = `(` + s + `)`
+		if bld.Len() > 0 {
+			b := &strings.Builder{}
+			b.WriteRune('(')
+			b.WriteString(bld.String())
+			b.WriteRune(')')
+			s = b.String()
 		}
 	}
 
