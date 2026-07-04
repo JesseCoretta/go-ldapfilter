@@ -1,0 +1,4 @@
+github.com/JesseCoretta/go-ldapsubstr v0.0.0-20260703225909-c8310096d290 h1:Gr7BbTVXDyN++NJoqx1Mnhf+MU+Sdob7fGANP5X2VJc=
+github.com/JesseCoretta/go-ldapsubstr v0.0.0-20260703225909-c8310096d290/go.mod h1:8X8jmaq8M/lu+AV16pWkGqxvAXeWng6y6H4tfZOVBk4=
+github.com/JesseCoretta/go-ldapsubstr v0.0.0-20260704000627-d24db52d2a15 h1:7aepk6SVeIAgnIOjzkpl5u14TV1cmFRolonhrB5Ay2s=
+github.com/JesseCoretta/go-ldapsubstr v0.0.0-20260704000627-d24db52d2a15/go.mod h1:8X8jmaq8M/lu+AV16pWkGqxvAXeWng6y6H4tfZOVBk4=
