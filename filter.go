@@ -1134,27 +1134,27 @@ func descrSyntaxCheck(x string) bool {
 	return true
 }
 
+func isValidArc(arc string) bool {
+	if strings.HasPrefix(arc, `-`) {
+		// can't be negative
+		return false
+	}
+	if len(arc) > 1 && arc[0] == '0' {
+		// base10 only
+		return false
+	}
+	for i := 0; i < len(arc); i++ {
+		if !('0' <= rune(arc[i]) && rune(arc[i]) <= '9') {
+			return false
+		}
+	}
+	return true
+}
+
 func oIDSyntaxCheck(o string) bool {
 	O := strings.Split(o, `.`)
 	if len(O) < 2 {
 		return false
-	}
-
-	validArc := func(arc string) bool {
-		if arc[0] == '-' {
-			// can't be negative
-			return false
-		}
-		if len(arc) > 1 && arc[0] == '0' {
-			// base10 only
-			return false
-		}
-		for i := 0; i < len(arc); i++ {
-			if !('0' <= rune(arc[i]) && rune(arc[i]) <= '9') {
-				return false
-			}
-		}
-		return true
 	}
 
 	switch string(O[0]) {
@@ -1169,13 +1169,12 @@ func oIDSyntaxCheck(o string) bool {
 		return false
 	}
 
-	for i := 1; i < len(O[1:]); i++ {
-		if !validArc(O[i]) {
-			return false
-		}
+	var res bool = true
+	for i := 1; i < len(O[1:]) && res; i++ {
+		res = isValidArc(O[i])
 	}
 
-	return true
+	return res
 }
 
 func splitFilterParts(input string) []string {

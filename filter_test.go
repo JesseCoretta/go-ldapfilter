@@ -364,36 +364,65 @@ func TestFilter_codecov(t *testing.T) {
 
 	var ands FilterAnd
 	ands.isFilter()
+	ands.IsZero()
 
 	var ors FilterOr
 	ors.isFilter()
+	ors.IsZero()
 
 	var nots FilterNot
 	nots.isFilter()
+	nots.IsZero()
 
 	var gEqual FilterGreaterOrEqual
 	_ = gEqual.String()
+	gEqual.isFilter()
+	gEqual.Desc = `n`
+	gEqual.Value = substr.AssertionValue(`test`)
+	gEqual.Len()
 	gEqual.Index(9)
 	gEqual.IsZero()
-	gEqual.Len()
-	gEqual.isFilter()
 
 	var lEqual FilterLessOrEqual
 	_ = lEqual.String()
+	lEqual.isFilter()
+	lEqual.Desc = `n`
+	lEqual.Value = substr.AssertionValue(`test`)
+	lEqual.Len()
 	lEqual.Index(9)
 	lEqual.IsZero()
-	lEqual.Len()
-	lEqual.isFilter()
+
+	var mat MatchingRuleAssertion
+	mat.MatchingRule = MatchingRuleID(`test`)
+	mat.IsZero()
 
 	var exts FilterExtensibleMatch
-	exts.Index(9)
-	exts.IsZero()
 	_ = exts.String()
-	exts.Len()
 	exts.isFilter()
 	exts.DNAttributes = true
 	_ = exts.String()
-	_, _ = marshalFilter(`a:dn:1.2.3:=John`)
+	e, _ := New(`(a:dn:1.2.3:=John)`)
+	e.(FilterExtensibleMatch).Len()
+	e.(FilterExtensibleMatch).Index(9)
+	e.(FilterExtensibleMatch).IsZero()
+
+	_ = isOIDOrDescr(``)
+	_ = descrSyntaxCheck(`abc123-`)
+	_ = descrSyntaxCheck(`-abc123`)
+	_ = descrSyntaxCheck(`abc--123`)
+	_ = descrSyntaxCheck(`abc#123`)
+
+	_, _ = assertString([]byte(`123`), 1, `cn`)
+	_, _ = assertString(``, 1, `cn`)
+	_ = oIDSyntaxCheck(`1.3.-6`)
+	_ = oIDSyntaxCheck(`1.3.6.-4`)
+	_ = oIDSyntaxCheck(`1.4A`)
+	_ = oIDSyntaxCheck(`1.41`)
+	_ = oIDSyntaxCheck(`3.4`)
+	_ = isValidArc(`a`)
+	_ = isValidArc(`06`)
+	_ = isValidArc(`?`)
+	_ = isValidArc(`-4`)
 
 	var tag AttributeTag = `imATag`
 	_ = tag.String()
@@ -402,18 +431,23 @@ func TestFilter_codecov(t *testing.T) {
 	var descr AttributeDescription = "cn;lang-en"
 	_ = descr.Type()
 
+	var extns FilterExtensibleMatch
+	extns.IsZero()
+
 	var substrings FilterSubstrings
 	_ = substrings.String()
-	substrings.Index(9)
-	substrings.IsZero()
-	substrings.Len()
 	substrings.Substrings = substr.SubstringAssertion{Any: substr.AssertionValue(`blarg`)}
+	substrings.Index(9)
+	substrings.Len()
+	substrings.IsZero()
 
 	substrings.isFilter()
 	substrings.Type = AttributeDescription(`cn`)
 
 	var eqly FilterEqualityMatch
 	_ = eqly.String()
+	eqly.Desc = `n`
+	eqly.Value = substr.AssertionValue(`test`)
 	eqly.Index(9)
 	eqly.IsZero()
 	eqly.Len()
@@ -421,6 +455,7 @@ func TestFilter_codecov(t *testing.T) {
 
 	var pres FilterPresent
 	_ = pres.String()
+	pres.Desc = `n`
 	pres.Index(9)
 	pres.IsZero()
 	pres.Len()
@@ -429,6 +464,8 @@ func TestFilter_codecov(t *testing.T) {
 
 	var aprx FilterApproximateMatch
 	_ = aprx.String()
+	aprx.Desc = `n`
+	aprx.Value = substr.AssertionValue(`test`)
 	aprx.Index(9)
 	aprx.IsZero()
 	aprx.Len()
