@@ -32,7 +32,7 @@ This example demonstrates the means for accessing a specific slice index
 within the return instance of [Filter].
 */
 func ExampleFilterAnd_Index() {
-	f, _ := New(`(&(|(sn;lang-sl=Lučić)(employeeID=123456789))(objectClass=person))`)
+	f, _ := New(`(&(|(sn=Lučić)(employeeID=123456789))(objectClass=person))`)
 
 	slice := f.Index(0).Index(1)
 	fmt.Printf("%s\n", slice)
@@ -186,18 +186,20 @@ func TestFilter(t *testing.T) {
 			Choice: `extensibleMatch`,
 			Length: 1,
 		},
-		{
-			Input:  `(givenName;lang-jp=ジェシー)`, // Jesse :)
-			Output: `(givenName;lang-jp=\e3\82\b8\e3\82\a7\e3\82\b7\e3\83\bc)`,
-			Choice: `equalityMatch`,
-			Length: 1,
-		},
-		{
-			Input:  `(sn;lang-sl:dn:=Lučić)`,
-			Output: `(sn;lang-sl:dn:=Lu\c4\8di\c4\87)`,
-			Choice: `extensibleMatch`,
-			Length: 1,
-		},
+		/*
+			{
+				Input:  `(givenName;lang-jp=ジェシー)`, // Jesse :)
+				Output: `(givenName;lang-jp=\e3\82\b8\e3\82\a7\e3\82\b7\e3\83\bc)`,
+				Choice: `equalityMatch`,
+				Length: 1,
+			},
+			{
+				Input:  `(sn;lang-sl:dn:=Lučić)`,
+				Output: `(sn;lang-sl:dn:=Lu\c4\8di\c4\87)`,
+				Choice: `extensibleMatch`,
+				Length: 1,
+			},
+		*/
 		{
 			Input:  `(givenName:caseExactMatch:=John)`,
 			Output: `(givenName:caseExactMatch:=John)`,
@@ -424,11 +426,7 @@ func TestFilter_codecov(t *testing.T) {
 	_ = isValidArc(`?`)
 	_ = isValidArc(`-4`)
 
-	var tag AttributeTag = `imATag`
-	_ = tag.String()
-	tag.isAttributeOption()
-
-	var descr AttributeDescription = "cn;lang-en"
+	var descr AttributeDescription = "cn"
 	_ = descr.Type()
 
 	var extns FilterExtensibleMatch
@@ -486,20 +484,13 @@ func TestFilter_codecov(t *testing.T) {
 	invalid.Len()
 	invalid.isFilter()
 
-	var attrdesc AttributeDescription
-	attrdesc = AttributeDescription(`cn;lang-cn`)
-	if attrdesc.Options()[0].Kind() != "tag" {
-		t.Errorf("%s failed: Failed to obtain AttributeOption (tag)",
-			t.Name())
-		return
-	}
-
 	checkParenEncaps(`(bdf`, `fdhjds`)
 	checkParenEncaps(`bdf`, `fdhjds)`)
 	checkParenEncaps(`bdf`, `fdhjds`)
 	checkParenEncaps(`Ibdf`, `fdhjds)`)
 
 	// antipanic checks
+	checkFilterOIDs(`at;bogus-tag`, `i`)
 	checkFilterOIDs(`at`, `_lr`)
 	checkFilterOIDs(`at`, ``)
 	checkFilterOIDs(`1.3.5`, ``)

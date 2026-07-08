@@ -157,24 +157,6 @@ AttributeDescription implements [Section 2.5 of RFC4512].
 type AttributeDescription string
 
 /*
-AttributeOption implements [Section 2.5 of RFC4512].
-
-[Section 2.5 of RFC4512]: https://datatracker.ietf.org/doc/html/rfc4512#section-2.5
-*/
-type AttributeOption interface {
-	Kind() string
-	String() string
-	isAttributeOption()
-}
-
-/*
-AttributeTag implements [Section 2.5.2 of RFC4512].
-
-[Section 2.5.2 of RFC4512]: https://datatracker.ietf.org/doc/html/rfc4512#section-2.5.2
-*/
-type AttributeTag string
-
-/*
 FilterPresent implements the "present" CHOICE of an instance of [Filter].
 */
 type FilterPresent struct {
@@ -218,19 +200,7 @@ String returns the string representation of the receiver instance.
 */
 func (r MatchingRuleID) String() string { return string(r) }
 
-/*
-Kind returns the string literal "tag" to describe the kind of [AttributeOption]
-represented by the receiver instance.
-*/
-func (r AttributeTag) Kind() string { return `tag` }
-
-/*
-String returns the string representation of the receiver instance.
-*/
-func (r AttributeTag) String() string { return string(r) }
-
 // differentiate Filter qualifiers from other interfaces.
-func (r AttributeTag) isAttributeOption()  {}
 func (r invalidFilter) isFilter()          {}
 func (r FilterAnd) isFilter()              {}
 func (r FilterNot) isFilter()              {}
@@ -478,36 +448,10 @@ func (r AttributeDescription) String() string {
 }
 
 /*
-Type returns only the "descr" component of the receiver instance.
-
-Specifically, this will ensure that elements such as [AttributeOption]
-instances -- such as language tags -- are not included in the return
-string value.
+Type returns only the "descr" string value of the receiver instance.
 */
-func (r AttributeDescription) Type() (oid string) {
-	oid = r.String()
-	if idx := strings.Index(oid, `;`); idx != -1 {
-		oid = oid[:idx]
-	}
-
-	return
-}
-
-/*
-Options returns slices of [AttributeOption] qualifier types based upon
-the contents of the receiver instance. For example attribute tags such
-as ";lang-sl", ";binary", et al, are among the possible returns.
-*/
-func (r AttributeDescription) Options() (options []AttributeOption) {
-	tsp := strings.Split(r.String(), `;`)
-	for i := 0; i < len(tsp); i++ {
-		// checkFilterOIDs enforces "keychar" ABNF.
-		if err := checkFilterOIDs(tsp[i], ``); err == nil && i != 0 {
-			options = append(options, AttributeTag(tsp[i]))
-		}
-	}
-
-	return
+func (r AttributeDescription) Type() string {
+	return r.String()
 }
 
 /*
@@ -1069,8 +1013,10 @@ func checkParenBalanced(x string) bool {
 
 func checkFilterOIDs(t, m string) (err error) {
 	if len(t) > 0 {
-		tsp := strings.Split(t, `;`) // we'll want to disregard tags
-		if !isOIDOrDescr(tsp[0]) {
+		if strings.Contains(t, `;`) {
+			err = errors.New("Invalid OID or descriptor (tags are prohibited): " + t)
+			return
+		} else if !isOIDOrDescr(t) {
 			err = errors.New("Invalid OID or descriptor: " + t)
 			return
 		}
